@@ -48,6 +48,8 @@ class Graph():
         self.vertex_num = 0
         self.edges = []
         self.vertices = []
+        self.belongs = set() 
+        self.tags = set()
     
     def get_vertex_num(self):
         return self.vertex_num
@@ -56,6 +58,9 @@ class Graph():
         # e.g. [v0,^]->[e1,^]->[e2,None]
         self.vertex_num += 1
         self.vertices.append([v,None])
+        self.belongs.add(v.belong)
+        for t in v.tag:
+            self.tags.add(t)
         
     def get_vertex_byid(self,index):
         return self.vertices[index][0]

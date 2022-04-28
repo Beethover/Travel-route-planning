@@ -11,13 +11,13 @@ from infor import *
 # 景点存储：序号(0起) 名称 归属地 标签
 # 路线存储：起点序号 终点序号 耗时 花费
 def read_in(graph):
-    with open('views.txt', encoding='utf-8') as f:
+    with open('views.txt') as f:
         for line in f.readlines():
             index, name, belg, *tag = line.split()
             v = View(name, belg, int(index), tag)
             graph.add_vertex(v)
             
-    with open('routes.txt', encoding='utf-8') as f:
+    with open('routes.txt') as f:
         for line in f.readlines():
             vi,ui,time,cost = [float(x) for x in line.split()]
             v = graph.get_vertex_byid(int(vi))
