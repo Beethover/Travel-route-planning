@@ -14,14 +14,19 @@ class View():
         self.name = name
         self.belong = belg
         self.index = index
-        self.tag = []
         if tag is not None:
             self.tag = tag
+        else:
+            self.tag = []
         
         
     def add_tag(self,ad):
         # 用列表
         self.tag += ad
+        
+    def __str__(self):
+        return '景点名称：%-8s归属地：%-8s标签：%s' \
+            % (self.name, self.belong, self.tag)
     
 # 边结点
 class ENode():
@@ -33,6 +38,9 @@ class ENode():
         self.cost = cost
         self.next = nxt
         
+    def __str__(self):
+        return '起点：%-8s终点：%-8s耗时：%-6.2f分 花费：%-6.2f元' \
+            % (self.start.name, self.end.name, self.time, self.cost)
     
 # 路线
 class Graph():
@@ -45,11 +53,18 @@ class Graph():
         return self.vertex_num
     
     def add_vertex(self,v):
-        # e.g. [v0,^]->[v1,t1,c1,^]->[v2,t2,c2,None]
+        # e.g. [v0,^]->[e1,^]->[e2,None]
         self.vertex_num += 1
         self.vertices.append([v,None])
+        
+    def get_vertex_byid(self,index):
+        return self.vertices[index][0]
     
-    def add_edges(self,v,u,time,cost):
+    def del_vertex(self,v):
+        self.vertices[v.index] = [None, None]
+        self.vertex_num -= 1
+    
+    def add_edge(self,v,u,time,cost):
         # 采用邻接出边表
         edge = ENode(v,u,time,cost,None)
         self.edges.append(edge)
@@ -61,6 +76,18 @@ class Graph():
                 p = p.next
             p.next = edge
         
+    def del_edge(self,edge):
+        vi = edge.start.index
+        p = self.vertices[vi][1]
+        if p == edge:
+            self.vertices[vi][1] = p.next
+        else:
+            while p.next is not None:
+                if p.next == edge:
+                    p.next = p.next.next
+                else:
+                    p = p.next                    
+    
     def get_out_edges(self,vi):
         # 返回ENode组成的列表
         edges = []
@@ -69,4 +96,5 @@ class Graph():
             edges.append(p)
             p = p.next
         return edges
+    
     
