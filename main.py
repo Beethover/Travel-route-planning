@@ -30,6 +30,13 @@ read_in(graph)
 
 
 # 页面函数
+def Tp(title, text):
+    tp = Toplevel()
+    tp.title(title)
+    tp.geometry('200x50')
+    Label(tp, text = text).pack()
+    
+
 def add_view_window():
     # 增加景点
     global add,e1,e2,e3
@@ -59,20 +66,14 @@ def get_newv():
     name = e1.get()
     belg = e2.get()
     if name=='' or belg=='':
-        tp = Toplevel()
-        tp.title('错误发生！')
-        tp.geometry('200x50')
-        Label(tp, text = '请完成输入后再增加！').pack()
+        Tp('错误发生！','请完成输入后再增加！')
         return
     
     tag = e3.get().split()
     index = graph.get_vertex_num()
     graph.add_vertex(View(name,belg,index,tag))
     
-    tp = Toplevel()
-    tp.title('好耶！')
-    tp.geometry('200x50')
-    Label(tp, text = '增加成功！').pack()
+    Tp('好耶！','增加成功！')
     
     with open('views.txt','a') as f:
         f.write('%d %s %s '%(index,name,belg) + ' '.join(tag) + '\n')
@@ -80,7 +81,7 @@ def get_newv():
     add.destroy()
 
 
-def search_view_window():
+def search_view_window(key):
     global svw, e1, c2, c3
     # 查询
     svw = Toplevel()
@@ -106,10 +107,10 @@ def search_view_window():
     c3['values'] = ['None'] + list(graph.tags)
     c3.current(0)
     
-    Button(svw, text = '查询', command = search_return)\
+    Button(svw, text = '查询', command = lambda:search_return(key))\
         .grid(row=3, column=1, sticky=W, padx=10, pady=5)
 
-def search_return():
+def search_return(key):
     name = e1.get()
     suggestions = search_v(name, graph)
     belg = c2.get()
@@ -126,7 +127,16 @@ def search_return():
     lb = Listbox(tp, selectmode = EXTENDED)
     lb.pack(side=LEFT, fill=BOTH, expand=True)
     for vi in suggestions:
-        lb.insert(END, str(graph.get_vertex_byid(vi)))
+        lb.insert(END, graph.get_vertex_byid(vi))
+        
+    if key == 'CHECK':
+        return
+    if key == 'DELETE':
+        text = '删除'
+        cmd = lambda x=lb: graph.del_vertex(x.curselection()[0])
+    
+    Button(tp, text = text, command = cmd)\
+        .pack(padx=10, pady=5)
 
 
 # 页面设计 Tkinter
@@ -141,7 +151,8 @@ menubar = Menu(root)
 view_mng = Menu(menubar, tearoff = False)
 view_mng.add_command(label = '增加', command = add_view_window)
 view_mng.add_separator()
-view_mng.add_command(label = '删除')
+view_mng.add_command(label = '删除', \
+                     command=lambda:search_view_window('DELETE'))
 view_mng.add_command(label = '修改')
 menubar.add_cascade(label = '景点管理', menu = view_mng)
 
@@ -153,7 +164,8 @@ edge_mng.add_command(label = '删除')
 edge_mng.add_command(label = '修改')
 menubar.add_cascade(label = '路线管理', menu = edge_mng)
 
-Button(root, text = '查询景点', command=search_view_window)\
+Button(root, text = '查询景点', \
+       command=lambda:search_view_window('CHECK'))\
     .pack(pady = 20)
 
 root.config(menu = menubar)

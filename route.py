@@ -20,7 +20,6 @@ def weight(e, key):
         return e.cost
     if key == 'CHANGE':
         return 1
-    raise ValueError('in weight')
 
 def single_route(graph, start_vi, end_vi, key):
     # 分支界限法

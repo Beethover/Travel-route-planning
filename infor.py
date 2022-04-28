@@ -65,8 +65,8 @@ class Graph():
     def get_vertex_byid(self,index):
         return self.vertices[index][0]
     
-    def del_vertex(self,v):
-        self.vertices[v.index] = [None, None]
+    def del_vertex(self,vi):
+        self.vertices[vi] = [None, None]
         self.vertex_num -= 1
     
     def add_edge(self,v,u,time,cost):
