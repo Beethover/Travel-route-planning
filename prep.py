@@ -13,14 +13,20 @@ from infor import *
 def read_in(graph):
     with open('views.txt') as f:
         for line in f.readlines():
-            index, name, belg, *tag = line.split()
+            if line == 'None\n':
+                graph.vertices.append([None,None])
+                continue
+            index, name, belg, *tag = line[3:].split()
             v = View(name, belg, int(index), tag)
             graph.add_vertex(v)
             
     with open('routes.txt') as f:
         for line in f.readlines():
-            vi,ui,time,cost = [float(x) for x in line.split()]
-            v = graph.get_vertex_byid(int(vi))
-            u = graph.get_vertex_byid(int(ui))
-            graph.add_edge(v, u, time, cost)
+            if line == 'None\n':
+                continue
+            vi,_,ui,time,cost = line.split()
+            vi = int(vi[3:]) ; ui = int(ui[3:])
+            time = float(time)
+            cost = float(cost)
+            graph.add_edge(vi, ui, time, cost)
 

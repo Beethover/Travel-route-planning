@@ -49,7 +49,7 @@ def single_route(graph, start_vi, end_vi, key):
             f = True
             break
         for e in graph.get_out_edges(j):
-            viewQ.enqueue((w + weight(e,key), e.start.index, e.end.index))
+            viewQ.enqueue((w + weight(e,key), e.start, e.end))
         
     # 没找到
     if not f:

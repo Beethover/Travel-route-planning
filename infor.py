@@ -30,17 +30,14 @@ class View():
     
 # 边结点
 class ENode():
-    def __init__(self,v,u,time,cost,nxt):
-        # 边：起点，终点，耗时，花费
-        self.start = v
-        self.end = u
+    def __init__(self,vi,ui,time,cost,nxt):
+        # 边：起点，终点，耗时（分钟），花费
+        self.start = vi
+        self.end = ui
         self.time = time
         self.cost = cost
         self.next = nxt
         
-    def __str__(self):
-        return '起点：%-8s终点：%-8s耗时：%-6.2f分 花费：%-6.2f元' \
-            % (self.start.name, self.end.name, self.time, self.cost)
     
 # 路线
 class Graph():
@@ -62,6 +59,10 @@ class Graph():
         for t in v.tag:
             self.tags.add(t)
         
+    def change_vertex(self,new_v):
+        index = new_v.index
+        self.vertices[index][0] = new_v
+        
     def get_vertex_byid(self,index):
         return self.vertices[index][0]
     
@@ -69,20 +70,20 @@ class Graph():
         self.vertices[vi] = [None, None]
         self.vertex_num -= 1
     
-    def add_edge(self,v,u,time,cost):
+    def add_edge(self,vi,ui,time,cost):
         # 采用邻接出边表
-        edge = ENode(v,u,time,cost,None)
+        edge = ENode(vi,ui,time,cost,None)
         self.edges.append(edge)
-        p = self.vertices[v.index][1]
+        p = self.vertices[vi][1]
         if p is None:
-            p = edge
+            self.vertices[vi][1] = edge
         else:
             while p.next is not None:
                 p = p.next
             p.next = edge
         
     def del_edge(self,edge):
-        vi = edge.start.index
+        vi = edge.start
         p = self.vertices[vi][1]
         if p == edge:
             self.vertices[vi][1] = p.next
