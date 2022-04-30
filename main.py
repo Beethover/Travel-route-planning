@@ -139,7 +139,7 @@ def get_newv():
         return
     
     tag = e3.get().split()
-    index = len(graph.vertices)
+    index = graph.get_vertex_num()
     graph.add_vertex(View(name,belg,index,tag))
     
     Tp('好耶！','增加成功！')

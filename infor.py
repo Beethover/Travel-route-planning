@@ -49,7 +49,7 @@ class Graph():
         self.tags = set()
     
     def get_vertex_num(self):
-        return self.vertex_num
+        return len(self.vertices)
     
     def add_vertex(self,v):
         # e.g. [v0,^]->[e1,^]->[e2,None]
