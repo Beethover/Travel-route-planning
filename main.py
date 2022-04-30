@@ -288,7 +288,7 @@ def get_newe():
 def search_edge_window(key):
     global sew, vi, ui, t1, t2
     sew = Toplevel()
-    sew.title('删除路线')
+    sew.title('查找路线')
     
     vi = -1; ui = -1
     
