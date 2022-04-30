@@ -30,7 +30,7 @@ class PrioQ():
         if self.is_empty():
             raise ValueError('in dequeue')
         self.size -= 1
-        elems = self._elems
+        elems = self.elems
         e0 = elems[0]
         e = elems.pop()
         if len(elems):

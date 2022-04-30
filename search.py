@@ -10,7 +10,7 @@ import re
 # 搜索景点
 def search_v(name,graph):
     if name == '':
-        return [i for i in range(len(graph.vertices)) \
+        return [i for i in range(graph.get_vertex_num()) \
                 if graph.get_vertex_byid(i)!=None]
     suggestions = []
     p = '.*?'.join(name)
