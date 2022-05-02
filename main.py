@@ -96,12 +96,9 @@ def search_return(key):
         text = '修改'
         cmd = lambda x=lb: \
             change_view_window(suggestions[x.curselection()[0]])
-    if key == 'CHOOSE_1':
+    if key[:-1] == 'CHOOSE_':
         text = '选择'
-        cmd = lambda x=lb: v_get('s', suggestions[x.curselection()[0]])
-    if key == 'CHOOSE_2':
-        text = '选择'
-        cmd = lambda x=lb: v_get('e', suggestions[x.curselection()[0]]) 
+        cmd = lambda x=lb: v_get(key[-1], suggestions[x.curselection()[0]])
     
     Button(sr, text = text, command = cmd)\
         .pack(padx=10, pady=5)
@@ -221,13 +218,22 @@ def change_v(vi):
     cvw.destroy()
 
 def v_get(p, get):
-    global vi, ui
-    if p=='s':
+    global vi, ui, start_vi, end_ui
+    if p=='1':
         vi = get
         t1.set(graph.get_vertex_byid(vi))
-    if p=='e':
+    if p=='2':
         ui = get
         t2.set(graph.get_vertex_byid(ui))
+    if p=='i':
+        start_vi = get
+        start_inf.set(graph.get_vertex_byid(start_vi))
+    if p=='d':
+        end_ui = get
+        txt.set(graph.get_vertex_byid(end_ui))
+    if p=='m':
+        dest.append(get)
+        mlb.insert(END, graph.get_vertex_byid(get))
     sr.destroy()
     svw.destroy()
     
@@ -317,11 +323,14 @@ def search_edge_return(key):
     if edge:
         sr = Toplevel()
         sr.title('路线信息')
+        sr.geometry('300x50')
         
-        edge_inf = '耗时：%-3d时%-3d分 花费：%-8.2f元'%\
+        edge_inf = '耗时：%-3d时%-3d分  花费：%-8.2f元'%\
             (int(edge.time//60), int(edge.time%60), edge.cost)
         Label(sr, text = edge_inf).pack()
         
+        if key == 'CHECK':
+            return
         if key == 'DELETE':
             text = '删除'
             cmd = lambda: delete_edge_tp(edge)
@@ -399,9 +408,120 @@ def change_e(edge):
     sr.destroy()
     cew.destroy()
 
+def single_route_window():
+    global srw, end_ui, txt, iv
+    if start_vi == -1:
+        Tp('错误发生！','请先完善起点信息！')
+        return
+    srw = Toplevel()
+    srw.title('单目的地规划')
+    
+    Label(srw, text = '目的地：').grid(row = 0, column = 0)
+    
+    end_ui = -1
+    txt = StringVar()
+    txt.set('请选择')
+    Label(srw, textvariable=txt).grid(row = 0, column = 1)
+    
+    Button(srw, text = '选择', \
+           command=lambda:search_view_window('CHOOSE_d'))\
+        .grid(row = 0, column = 2)
+        
+    group = LabelFrame(srw, text = '规划倾向')
+    group.grid(row = 1, column = 1)
+    iv = IntVar()
+    iv.set(0)
+    KEY = [
+        ('时间最少',0),
+        ('花钱最少',1),
+        ('换乘最少',2)]
+    for k,num in KEY:
+        Radiobutton(group,
+                text=k,
+                variable=iv,
+                value=num,
+                indicatoron=False).pack(anchor=W, padx = 10, pady = 5)
+
+    
+    Button(srw, text = '开始规划', \
+           command=single_route_return)\
+        .grid(row = 2, column = 1, pady = 10)
+
+def single_route_return():
+    key = ['TIME','COST','CHANGE'][iv.get()]
+    p = single_route(graph, start_vi, end_ui, key)
+    if not p:
+        Tp('错误发生！','找不到去这里的路！')
+        return
+    route_return(p, end_ui)
+    
+def route_return(p, *dest):
+    road,w = p
+    srr = Toplevel()
+    srr.title('规划结果')
+    srr.geometry('300x200')
+    
+    Label(srr, text = '从 %s 出发'%graph.get_vertex_byid(start_vi).name)\
+        .pack()
+    
+    for i in road[1:]:
+        if i in dest:
+            Label(srr, text = '到达目的地：%s'%\
+                  graph.get_vertex_byid(i).name)\
+                .pack()
+        else:
+            Label(srr, text = '经过：%s'%graph.get_vertex_byid(i).name)\
+                .pack()
+    
+   
+    Label(srr, text = '总共耗时%-3d时%-3d分\n花费%-8.2f元\n换乘%d次'%\
+          (int(w[0]//60), int(w[0]%60), w[1], w[2])).pack()
+    
+def multi_route_window():
+    global dest, mlb
+    if start_vi == -1:
+        Tp('错误发生！','请先完善起点信息！')
+        return
+
+    mrw = Toplevel()
+    mrw.title('多目的地规划')
+    mrw.geometry('500x200')
+    
+    lframe = Frame(mrw)
+    rframe = Frame(mrw)
+    
+    dest = []
+    mlb = Listbox(lframe, selectmode=EXTENDED)
+    mlb.pack(side=LEFT, fill=BOTH, expand=True)
+    
+    Button(rframe, text = '增加目的地', \
+           command = lambda:search_view_window('CHOOSE_m'))\
+        .grid(row=0, padx = 5, pady = 10)
+    Button(rframe, text = '删除目的地', \
+           command = delete_dest)\
+        .grid(row=1, padx = 5, pady = 10)
+    Button(rframe, text = '开始规划', \
+           command = multi_route_return)\
+        .grid(row=2, padx = 5, pady = 10)
+    
+    lframe.pack(side=LEFT, fill=BOTH, expand=True)
+    rframe.pack(side=RIGHT)
+
+def delete_dest():
+    get = dest[mlb.curselection()[0]]
+    dest.remove(get)
+    mlb.delete(ACTIVE)
+
+def multi_route_return():
+    p = multi_route(graph, start_vi, dest)
+    if not p:
+        Tp('错误发生！','找不到去这里的路！')
+        return
+    route_return(p, dest)
 
 # 页面设计 Tkinter
 def main():
+    global start_inf, start_vi
     root = Tk()
     root.title('旅游规划宝')
     root.geometry('500x500')
@@ -432,9 +552,38 @@ def main():
     
     # 页面
     # 按钮功能
-    Button(root, text = '查询景点', \
+    Bframe = Frame(root)
+    ## 查询
+    Button(Bframe, text = '查询景点', \
            command=lambda:search_view_window('CHECK'))\
-        .pack(pady = 20)
+        .grid(row = 0, column = 0, padx = 10, pady = 20)
+    Button(Bframe, text = '查询路线', \
+           command=lambda:search_edge_window('CHECK'))\
+        .grid(row = 0, column = 1, padx = 10, pady = 20)
+    
+    ## 路线规划
+    Button(Bframe, text = '单目的地规划', \
+           command = single_route_window)\
+        .grid(row = 1, column = 0, padx = 10)
+    Button(Bframe, text = '多目的地规划', \
+           command = multi_route_window)\
+        .grid(row = 1, column = 1, padx = 10)
+    
+    Bframe.pack(side=TOP)
+    
+    # 显示器
+    Lframe = Frame(root)
+    # 完善起点信息
+    Button(Lframe, text = '完善起点信息', \
+           command=lambda:search_view_window('CHOOSE_i'))\
+        .pack()
+    start_vi = -1
+    start_inf = StringVar()
+    start_inf.set('请先完善起点信息！')
+    Label(Lframe, textvariable=start_inf).pack(pady = 20)
+    
+    
+    Lframe.pack(side=TOP, pady = 50)
     
     root.config(menu = menubar)
     

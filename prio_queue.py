@@ -38,7 +38,7 @@ class PrioQ():
         return e0
     
     def siftdown(self, elem, begin, end):
-        elems, i, j, = self._elems, begin, begin*2+1
+        elems, i, j, = self.elems, begin, begin*2+1
         while j<end:
             if j+1 < end and elems[j+1] < elems[j]:
                 # j less than its brother
