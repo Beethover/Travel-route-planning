@@ -232,6 +232,9 @@ def v_get(p, get):
         end_ui = get
         txt.set(graph.get_vertex_byid(end_ui))
     if p=='m':
+        if get in dest:
+            Tp('错误发生！','已经添加过该景点！')
+            return
         dest.append(get)
         mlb.insert(END, graph.get_vertex_byid(get))
     sr.destroy()
