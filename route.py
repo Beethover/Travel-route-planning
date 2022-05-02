@@ -77,19 +77,20 @@ def nearest_route(graph, start_vi, dest, key):
 
 # 单目的地
 def single_route(graph, start_vi, end_vi, key):
-    return nearest_route(graph, start_vi, end_vi, key=key)
+    return nearest_route(graph, start_vi, [end_vi], key=key)
 
 # 多目的地
 # 遵循临近点原则，采用（权值，前驱）记录
 def multi_route(graph, start_vi, dest):
     roads = [] ; wt = (0,0,0)
-    while dest:
-        p = nearest_route(graph, start_vi, dest, key='CHANGE')
+    dest_t = dest.copy()
+    while dest_t:
+        p = nearest_route(graph, start_vi, dest_t, key='CHANGE')
         if not p:
             return False
         road, w = p
         roads += road
         wt = [wt[i] + w[i] for i in range(3)]
-        dest.remove(road[-1])
+        dest_t.remove(road[-1])
     return roads, wt
         

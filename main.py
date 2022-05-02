@@ -455,7 +455,7 @@ def single_route_return():
         return
     route_return(p, end_ui)
     
-def route_return(p, *dest):
+def route_return(p, dest):
     road,w = p
     srr = Toplevel()
     srr.title('规划结果')
