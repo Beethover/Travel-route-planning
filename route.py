@@ -51,7 +51,7 @@ def nearest_route(graph, start_vi, dest, key):
             # 不是最优
             continue
         route[j] = i
-        mini[j] = w
+        mini[j] = w[0]
         # 找到终点
         if j in dest:
             f = True

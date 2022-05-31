@@ -6,7 +6,8 @@ Created on Thu Apr 21 12:36:49 2022
 """
 
 # 旅游规划
-# copyright 2100011461 物理学院 陈贝宁
+# copyright  2100011461 物理学院 陈贝宁
+# cooperator 2100011455 物理学院 张凌睿
 
 # 信息管理：增删改(开发者模式)
 ## 景点信息：名称、归属地、标签等
@@ -77,7 +78,7 @@ def search_return(key):
                 suggestions.remove(i)
     sr = Toplevel()
     sr.title('查找结果')
-    sr.geometry('400x200')
+    sr.geometry('500x200')
     lb = Listbox(sr, selectmode = EXTENDED)
     lb.pack(side=LEFT, fill=BOTH, expand=True)
     if suggestions:
@@ -356,8 +357,7 @@ def delete_edge_tp(edge):
         content = f.read()
         pos1 = content.find('NO.%d to NO.%d'%(edge.start, edge.end))
         pos2 = content.find('\n', pos1+1)
-        content = content[:pos1] + 'None' + '\n' + \
-            content[pos2+1:]
+        content = content[:pos1] + content[pos2+1:]
     with open('routes.txt','w') as f:
         f.write(content)
     
@@ -456,29 +456,61 @@ def single_route_return():
     if not p:
         Tp('错误发生！','找不到去这里的路！')
         return
-    route_return(p, end_ui)
+    pr = single_route(graph, end_ui, start_vi, key)
+    route_return(p, pr, [end_ui])
     
-def route_return(p, dest):
+def route_return(p, pr, dest):
     road,w = p
+    road_r,w_r = pr
     srr = Toplevel()
     srr.title('规划结果')
     srr.geometry('300x200')
     
-    Label(srr, text = '从 %s 出发'%graph.get_vertex_byid(start_vi).name)\
+    cv = Canvas(srr,width=300,height=200,scrollregion=(0,0,300,2000))
+    frr = Frame(cv)
+    vbar = Scrollbar(cv, orient=VERTICAL)
+    vbar.place(x=280, width=20, height=200)
+    vbar.configure(command=cv.yview)
+    
+    Label(frr, text = '从 %s 出发'%graph.get_vertex_byid(start_vi).name)\
         .pack()
     
     for i in road[1:]:
         if i in dest:
-            Label(srr, text = '到达目的地：%s'%\
+            Label(frr, text = '到达目的地：%s'%\
                   graph.get_vertex_byid(i).name)\
                 .pack()
         else:
-            Label(srr, text = '经过：%s'%graph.get_vertex_byid(i).name)\
+            Label(frr, text = '经过：%s'%graph.get_vertex_byid(i).name,
+                  fg = '#A8A8A8')\
                 .pack()
     
-   
-    Label(srr, text = '总共耗时%-3d时%-3d分\n花费%-8.2f元\n换乘%d次'%\
-          (int(w[0]//60), int(w[0]%60), w[1], w[2])).pack()
+    Label(frr, text = '旅游完毕耗时%-3d时%-3d分\n花费%-8.2f元\n换乘%d次'%\
+          (int(w[0]//60), int(w[0]%60), w[1], w[2]), \
+              fg = '#FF0000').pack()
+    
+    Label(frr, text = '所有目的地都经过了，现在返回', \
+              fg = '#0000FF').pack()
+    w = [w_r[i] + w[i] for i in range(3)]
+    # return
+    for i in road_r[1:]:
+        if i == start_vi:
+            Label(frr, text = '回到起点：%s'%\
+                  graph.get_vertex_byid(i).name)\
+                .pack()
+        else:
+            Label(frr, text = '经过：%s'%graph.get_vertex_byid(i).name,
+                  fg = '#A8A8A8')\
+                .pack()
+    
+    Label(frr, text = '总共耗时%-3d时%-3d分\n花费%-8.2f元\n换乘%d次'%\
+          (int(w[0]//60), int(w[0]%60), w[1], w[2]), \
+              fg = '#FF0000').pack()
+    
+    frr.place(width=280, height=200)
+    cv.place(x=0,y=0)
+    cv.config(yscrollcommand=vbar.set)
+    cv.create_window((150,0),anchor='n', window = frr)
     
 def multi_route_window():
     global dest, mlb
@@ -520,7 +552,10 @@ def multi_route_return():
     if not p:
         Tp('错误发生！','找不到去这里的路！')
         return
-    route_return(p, dest)
+    # return to start
+    end_t = p[0][-1]
+    pr = single_route(graph, end_t, start_vi, 'CHANGE')
+    route_return(p, pr, dest)
 
 # 页面设计 Tkinter
 def main():
